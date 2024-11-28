@@ -1,0 +1,25 @@
+services:
+  api-server:
+    image: v4variables/devexp-assessment-api-server:latest
+    container_name: sinch-assessment-api-server
+    ports:
+      - "3000:3000"
+    environment:
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8080:8080"
+    environment:
+      API_URL: http://localhost:3000/docs/openapi.yaml
+    volumes:
+      - ./openapi:/openapi
+
+  redoc:
+    image: redocly/redoc
+    ports:
+      - "8090:80"
+    environment:
+      SPEC_URL: http://localhost:3000/docs/openapi.yaml

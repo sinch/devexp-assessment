@@ -6,7 +6,7 @@ You will find below the instructions to complete for your work assessment:  you 
 
 ## Understanding the API
 
-You can find the OpenAPI Specification for this API in YAML at the following location: ./docs/openapi.yaml
+You can find the OpenAPI Specification for this API in YAML at the following location: [./docs/openapi.yaml](./docs/openapi.yaml)
 
 Typically, such YAML file is not meant to be read by an API user but rather to be processed by a specification viewer such as SwaggerUI or Redocly. You're in luck, we have prepared both tools for you!
 
@@ -16,6 +16,7 @@ Typically, such YAML file is not meant to be read by an API user but rather to b
 2. Navigate to the root of the cloned repository on your local machine
 3. If not yet installed, install Docker on your machine
 4. Execute the command `docker compose up`
+5. (If instructed, run the command `docker compose pull` to fetch the latest version of the Docker image)
 
 This command will start 3 servers locally:
  - http://localhost:8080 => Swagger UI
@@ -33,9 +34,9 @@ The API is a very simple messaging API where a user can:
 
 ### Authentication
 
-All the endpoints are protected by an API Key: your recruiter will give it to you.
+All the endpoints are protected by an API Key: `there-is-no-key` 🐇
 
-When sending a message to the API, all requests must contain the following header: `Authorization: Bearer YOUR_API_KEY`
+When sending a message to the API, all requests must contain the following header: `Authorization: Bearer there-is-no-key`
 
 ## Your tasks
 
@@ -52,15 +53,29 @@ Make sure to include some tests in your submission! We would love to discuss wit
 
 ## Bonus tasks
 
-You may have noticed that when you send a message, the status is set to `queued` but after a while, the status becomes `failed`. This API simulates a sending queue and will considered that the message is properly delivered if there is a server that acknowledges the delivery.
+You may have noticed that when you send a message, the status is set to `queued` but after a while, the status becomes `failed`. This API simulates a sending queue and will consider that the message is properly delivered if there is a server that acknowledges the delivery.
 
-In order to do so, you will need to use the last section of the API: the webhooks. When you send a message, the API server will send a request to a WEBHOOK_URL(default http://localhost:3010) and include an `Authorization` header with the message signature (signed by default with the WEBHOOK_SECRET `mySecret`).
+In order to do so, you will need to use the last section of the API: the webhooks. When you send a message, the API server will send a request to a WEBHOOK_URL(default http://localhost:3010/webhooks) and include an `Authorization` header with the message signature (signed by default with the WEBHOOK_SECRET `mySecret`).
+Here is the signature algorithm in pseudo-code:
+```
+function generateSignature(message, secret):
+    # Step 1: Create an HMAC object with SHA256 as the hashing algorithm
+    hmac = createHMAC(secret, "sha256")
+    
+    # Step 2: Update the HMAC object with the message
+    hmac.update(message)
+    
+    # Step 3: Compute the final HMAC digest and return it as a hexadecimal string
+    signature = hmac.digest("hex")
+    
+    return signature
+```
 
 You will have to:
- - implement an application server that will receive the event notifications
- - add a method in your SDK to validate the `Authorization` header is valid
- - handle the event (Printing the body in the console will be enough)
+ - implement an application server that will receive the events notifications
+ - add a method in your SDK to verify that the `Authorization` header is valid
+ - in your application server, use your SDK library to validate the `Authorization` header and handle the event (Printing the body in the console will be enough)
 
 ## Submission
 
-All your code has to be pushed to a GitHub repository. When you are done, share it with your recruiter, we will review your submission and discuss about it with you in your next interview. Good luck!
+All your code has to be pushed to a public GitHub repository. When you are done, share it with your recruiter, we will review your submission and discuss it with you in your next interview. Good luck!

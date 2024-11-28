@@ -1,0 +1,551 @@
+openapi: 3.1.0
+info:
+  title: Sample Messaging API
+  description: A simple API for simulating sending text messages and receiving status updates via webhooks.
+  version: 1.0.0
+  contact:
+    name: Sinch Talent Acquisition
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: Contacts
+    description: Manage messages' recipients
+  - name: Messages
+    description: Send a message and fetch sent messages
+security:
+  - bearerAuth: []
+paths:
+  /messages:
+    post:
+      tags:
+        - Messages
+      summary: Send a new message
+      description: Create and queue a new message for delivery.
+      operationId: sendAndQueueMessageForDelivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageRequest"
+      responses:
+        '201':
+          description: Message created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+    get:
+      tags:
+        - Messages
+      summary: List sent messages
+      description: List the sent messages with pagination
+      operationId: getMessages
+      parameters:
+        - name: page
+          description: page number to fetch
+          in: query
+          schema:
+            type: number
+        - name: limit
+          description: maximum number of elements per page (100 by default)
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: List of messages retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMessagesResponse"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+  /messages/{id}:
+    get:
+      tags:
+        - Messages
+      summary: Retrieve a sent message
+      description: Get details of a specific message by ID.
+      operationId: getMessage
+      parameters:
+        - name: id
+          description: ID of the message to retrieve.
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Message retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '404':
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageNotFoundError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+  /contacts:
+    post:
+      tags:
+        - Contacts
+      summary: Create a new contact
+      description: Adds a new contact to the system.
+      operationId: createContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContactRequest"
+      responses:
+        '201':
+          description: Contact created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+    get:
+      tags:
+        - Contacts
+      summary: List the existing contacts
+      description: List the contacts with pagination
+      operationId: list_contacts
+      parameters:
+        - name: pageIndex
+          description: page index
+          in: query
+          schema:
+            type: number
+        - name: max
+          description: maximum number of elements per page (default 10)
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: List of contacts retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListContactsResponse"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+  /contacts/{id}:
+    get:
+      tags:
+        - Contacts
+      summary: Retrieve a contact
+      description: Fetches details of a specific contact by ID.
+      operationId: getContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the contact.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contact retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '404':
+          description: Contact not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactNotFoundError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+    patch:
+      tags:
+        - Contacts
+      summary: Update a contact
+      description: Updates details of a specific contact.
+      operationId: updateContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the contact.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateContactRequest"
+      responses:
+        '200':
+          description: Contact updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '404':
+          description: Contact not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactNotFoundError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+    delete:
+      tags:
+        - Contacts
+      summary: Delete a contact
+      description: Removes a specific contact by ID.
+      operationId: deleteContact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique ID of the contact.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Contact deleted successfully.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        '404':
+          description: Contact not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactNotFoundError"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerError"
+webhooks:
+  message.delivery:
+    post:
+      summary: Message delivery status notification
+      description: Notifies the client about the delivery status of a message.
+      operationId: messageDelivery_webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageDeliveryEvent'
+      responses:
+        '200':
+          description: Acknowledgement of the webhook.
+components:
+  schemas:
+    CreateMessageRequest:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/MessageCommonProps"
+      properties:
+        to:
+          $ref: "#/components/schemas/MessageContact"
+      required:
+        - from
+        - to
+        - content
+    MessageCommonProps:
+      type: object
+      properties:
+        from:
+          type: string
+          description: The sender's phone number.
+        content:
+          type: string
+          description: The text content of the message.
+    MessageContact:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/ContactID"
+        - $ref: "#/components/schemas/ContactDetails"
+    ContactID:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier of a Contact.
+      required:
+        - id
+    ContactDetails:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the contact.
+        phone:
+          type: string
+          format: E.164
+          description: The phone number of the contact.
+      required:
+        - name
+        - phone
+    Message:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/MessageCommonProps"
+        - $ref: "#/components/schemas/MessageStatus"
+      properties:
+        to:
+          $ref: "#/components/schemas/Contact"
+      required:
+        - from
+        - to
+        - content
+        - id
+        - status
+        - createdAt
+    GetMessagesResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        page:
+          type: number
+        quantityPerPage:
+          type: number
+      required:
+        - page
+        - quantityPerPage
+        - messages
+    MessageStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the message.
+        status:
+          type: string
+          enum: [ queued, delivered, failed ]
+          description: Initial status of the message.
+        createdAt:
+          type: string
+          format: date-time
+          description: Time when the message was created.
+        deliveredAt:
+          type: string
+          format: date-time
+          description: Time when the message was delivered.
+      required:
+        - id
+        - status
+        - createdAt
+    CreateContactRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the contact.
+        phone:
+          type: string
+          format: E.164
+          description: The phone number of the contact.
+      required:
+        - name
+        - phone
+    UpdateContactRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The updated name of the contact.
+        phone:
+          type: string
+          format: E.164
+          description: The updated phone number.
+    Contact:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/CreateContactRequest"
+        - type: object
+          properties:
+            id:
+              type: string
+              description: The unique ID of the contact.
+      required:
+        - id
+    ListContactsResponse:
+      type: object
+      properties:
+        contactsList:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contact"
+        pageNumber:
+          type: number
+        pageSize:
+          type: number
+      required:
+        - contactsList
+        - pageNumber
+        - pageSize
+    MessageDeliveryEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the message.
+        status:
+          type: string
+          enum: [queued, delivered, failed]
+          description: The delivery status of the message.
+        deliveredAt:
+          type: string
+          format: date-time
+          description: Time of delivery, if delivered.
+        failureReason:
+          type: string
+          description: Reason for failure, if applicable.
+      required:
+        - id
+        - status
+    UnauthorizedError:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    BadRequest:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    MessageNotFoundError:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+    ContactNotFoundError:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+      required:
+        - message
+    ServerError:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
